@@ -51,7 +51,7 @@ export const App = () => {
         />
         <Route
           path="/*"
-          element={authUser ? <Navigate to="/" /> : <Navigate to="/login" />}
+          element={<Navigate to="/" replace  />}
         />
       </Routes>
 
