@@ -5,9 +5,6 @@ import { io } from "socket.io-client";
 
 const BASE_URL =
   import.meta.env.MODE == "production" ? "/" : "http://localhost:5000/";
-console.log(import.meta.env.MODE);
-
-console.log(import.meta.env.NODE_ENV);
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
