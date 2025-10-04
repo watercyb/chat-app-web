@@ -1,7 +1,7 @@
 import { generateToken } from "../lib/utils.js";
-import User from "../models/user_model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
+import { getUserByEmail, createUser } from "../database/db.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -14,21 +14,16 @@ export const signup = async (req, res) => {
         .status(400)
         .json({ message: "Password mush be at least 6 characters." });
 
-    const user = await User.findOne({ email });
+    const user = await getUserByEmail(email);
     if (user) return res.status(400).json({ message: "Email already exists." });
 
     const salt = await bcrypt.genSalt(10); //10 iterations.
     const hashedPassword = await bcrypt.hash(password, salt); //Bcrypt version + iteration + salt + hashed password.
 
-    const newUser = new User({
-      fullName,
-      email,
-      password: hashedPassword,
-    });
+    const newUser = await createUser(fullName, email, hashedPassword);
 
     if (newUser) {
       generateToken(newUser._id, res);
-      await newUser.save();
 
       res.status(201).json({
         _id: newUser._id,
@@ -49,7 +44,7 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await getUserByEmail(email);
 
     if (!user) return res.status(400).json({ message: "Invalid credentials." });
 

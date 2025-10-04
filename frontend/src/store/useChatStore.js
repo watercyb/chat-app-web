@@ -17,7 +17,7 @@ export const useChatStore = create((set, get) => ({
       set({ users: res.data });
     } catch (error) {
       if (error.response) {
-        toast.error(error.response.data.message);
+        toast.error(error.response.data.message || error.response.data.error);
       } else if (error.request) {
         toast.error("No response from server. Please try again later.");
       }
@@ -34,7 +34,7 @@ export const useChatStore = create((set, get) => ({
       set({ messages: res.data });
     } catch (error) {
       if (error.response) {
-        toast.error(error.response.data.message);
+        toast.error(error.response.data.message || error.response.data.error);
       } else if (error.request) {
         toast.error("No response from server. Please try again later.");
       }
@@ -53,7 +53,7 @@ export const useChatStore = create((set, get) => ({
       );
     } catch (error) {
       if (error.response) {
-        toast.error(error.response.data.message);
+        toast.error(error.response.data.message || error.response.data.error);
       } else if (error.request) {
         toast.error("No response from server. Please try again later.");
       }

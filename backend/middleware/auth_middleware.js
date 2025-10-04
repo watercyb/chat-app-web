@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user_model.js";
+import { getUserById } from "../database/db.js";
 
 export const protextRoute = async (req, res, next) => {
   try {
@@ -10,7 +10,7 @@ export const protextRoute = async (req, res, next) => {
     if (!decoded)
       return res.status(400).json({ message: "Please login first." });
 
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await getUserById(decoded.userId);
     if (!user) return res.status(400).json({ message: "Please login first." });
 
     req.user = user;

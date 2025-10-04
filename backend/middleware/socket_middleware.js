@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user_model.js";
+import { getUserById } from "../database/db.js";
 import cookie from "cookie";
 
 export const socket_protextRoute = async (socket, next) => {
@@ -11,7 +11,7 @@ export const socket_protextRoute = async (socket, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) return;
 
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await getUserById(decoded.userId);
     if (!user) return;
 
     socket.user = user;

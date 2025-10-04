@@ -1,15 +1,15 @@
-import User from "../models/user_model.js";
-import Message from "../models/message_model.js";
+import {
+  getAllUsers,
+  getMessagesByIds,
+  createMessage,
+} from "../database/db.js";
 import cloudinary from "../lib/cloudinary.js";
-import mongoose from "mongoose";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const getUsersForSideBar = async (req, res) => {
   try {
     const loggedInUserId = req.user._id;
-    const fileteredUsers = await User.find({
-      _id: { $ne: loggedInUserId },
-    }).select("-password");
+    const fileteredUsers = await getAllUsers(loggedInUserId);
 
     res.status(200).json(fileteredUsers);
   } catch (error) {
@@ -20,17 +20,8 @@ export const getUsersForSideBar = async (req, res) => {
 
 export const getMessages = async (req, res) => {
   try {
-    const userToChatId = req.params.id;
-    if (!mongoose.Types.ObjectId.isValid(userToChatId))
-      return res.status(400).json({ message: "Invalid user ID." });
-    const myId = req.user._id;
-
-    const messages = await Message.find({
-      $or: [
-        { senderId: myId, receiverId: userToChatId },
-        { senderId: userToChatId, receiverId: myId },
-      ],
-    });
+    const messages = await getMessagesByIds(req.user._id, req.params.id);
+    if (!messages) return res.status(400).json({ message: "Invalid user ID." });
 
     res.status(200).json(messages);
   } catch (error) {
@@ -53,14 +44,7 @@ export const sendMessage = async (req, res) => {
       imageUrl = uploadResponse.secure_url;
     }
 
-    const newMessage = new Message({
-      senderId,
-      receiverId,
-      text,
-      image: imageUrl,
-    });
-
-    await newMessage.save();
+    const newMessage = await createMessage(senderId, receiverId, text, image);
 
     const senderSocketIds = getReceiverSocketId(senderId);
     if (senderSocketIds) {
