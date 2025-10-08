@@ -1,7 +1,11 @@
 import { generateToken } from "../lib/utils.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
-import { getUserByEmail, createUser } from "../database/db.js";
+import {
+  getUserByEmail,
+  createUser,
+  findByIdAndUpdate,
+} from "../database/db.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -80,7 +84,6 @@ export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;
     const userId = req.user._id;
-
     if (!profilePic)
       return res.status(400).json({ message: "Profile pic is required." });
 
@@ -89,11 +92,11 @@ export const updateProfile = async (req, res) => {
       public_id: userId,
       overwrite: true,
     });
-    const updateUser = await User.findByIdAndUpdate(
+
+    const updateUser = await findByIdAndUpdate(
       userId,
-      { profilePic: uploadResponse.secure_url },
-      { new: true }
-    ).select("-password");
+      uploadResponse.secure_url
+    );
 
     res.status(200).json(updateUser);
   } catch (error) {

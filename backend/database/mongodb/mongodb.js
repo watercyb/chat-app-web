@@ -4,7 +4,7 @@ import Message from "./models/message_model.js";
 
 export const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI);
     console.log("mongedb connected.");
   } catch (error) {
     console.log("mongedb connecting error:" + error);
@@ -20,14 +20,21 @@ export const getUserById = async (userId) => {
 };
 
 export const getUserByEmail = async (email) => {
-  const user = await User.findOne({ email });
-  return user;
+  return await User.findOne({ email });
 };
 
 export const createUser = async (fullName, email, password) => {
   const newUser = new User({ fullName, email, password });
   await newUser.save();
   return newUser;
+};
+
+export const findByIdAndUpdate = async (userId, url) => {
+  return User.findByIdAndUpdate(
+    userId,
+    { profilePic: url },
+    { new: true }
+  ).select("-password");
 };
 
 export const getMessagesByIds = async (myId, userToChatId) => {

@@ -5,7 +5,7 @@ let db;
 dotenv.config();
 switch (process.env.DB_TYPE) {
   case "sql":
-    db = await import("./sql.js");
+    db = await import("./sql/sql.js");
     break;
   case "mongodb":
     db = await import("./mongodb/mongodb.js");
@@ -20,6 +20,7 @@ export const {
   getUserByEmail,
   createUser,
   getAllUsers,
+  findByIdAndUpdate,
   getMessagesByIds,
   createMessage,
 } = db;
