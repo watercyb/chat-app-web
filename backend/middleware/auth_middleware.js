@@ -1,21 +1,15 @@
-import jwt from "jsonwebtoken";
 import { getUserById } from "../database/db.js";
-
-var n = 0;
+import { verifyToken } from "../auth/auth.js";
 
 export const protextRoute = async (req, res, next) => {
   try {
-    const token = req.cookies.jwt;
-    if (!token) return res.status(400).json({ message: "Please login first." });
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded)
+    const userId = await verifyToken(req.cookies, res);
+    if (!userId)
       return res.status(400).json({ message: "Please login first." });
 
-    const user = await getUserById(decoded.userId);
+    const user = await getUserById(userId);
     if (!user) return res.status(400).json({ message: "Please login first." });
 
-    
     req.user = user;
     next();
   } catch (error) {

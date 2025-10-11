@@ -44,7 +44,12 @@ export const sendMessage = async (req, res) => {
       imageUrl = uploadResponse.secure_url;
     }
 
-    const newMessage = await createMessage(senderId, receiverId, text, imageUrl);
+    const newMessage = await createMessage(
+      senderId,
+      receiverId,
+      text,
+      imageUrl
+    );
 
     const senderSocketIds = getReceiverSocketId(senderId);
     if (senderSocketIds) {
