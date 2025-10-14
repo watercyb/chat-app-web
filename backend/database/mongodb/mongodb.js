@@ -23,8 +23,13 @@ export const getUserByEmail = async (email) => {
   return await User.findOne({ email });
 };
 
-export const createUser = async (fullName, email, password) => {
-  const newUser = new User({ fullName, email, password });
+export const createUser = async (fullName, email, password, id) => {
+  let newUser;
+  if (id) {
+    newUser = new User({ _id: id, fullName, email, password });
+  } else {
+    newUser = new User({ fullName, email, password });
+  }
   await newUser.save();
   return newUser;
 };

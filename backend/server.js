@@ -8,8 +8,6 @@ import messageRoutes from "./routes/message.js";
 import { app, server } from "./lib/socket.js";
 import path from "path";
 
-import { connectDB as myConnect } from "./database/sql/sql.js";
-
 const port = process.env.PORT;
 
 const __dirname = path.resolve();
@@ -36,5 +34,4 @@ app.use("/api/messages", messageRoutes);
 server.listen(port, () => {
   console.log("Running on: " + port);
   connectDB();
-  myConnect();
 });

@@ -5,92 +5,85 @@ import {
   AdminGetUserCommand,
   InitiateAuthCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
-import crypto from "crypto";
 import { appendToken } from "../../lib/utils.js";
 import { createUser, getUserByEmail } from "../../database/db.js";
 import { verifyIdToken } from "./verifyIdToken.js";
+import { cognitoLogin } from "./cognitoLogin.js";
 
 const cognito = new CognitoIdentityProviderClient({
   region: process.env.AWS_REGION,
 });
 
-const getSecretHash = (username, clientId, clientSecret) => {
-  if (!clientSecret) return undefined;
-  return crypto
-    .createHmac("SHA256", clientSecret)
-    .update(username + clientId)
-    .digest("base64");
-};
+export const signup = async (req, res) => {
+  const { fullName, email, password } = req.body;
+  try {
+    await cognito.send(
+      new AdminCreateUserCommand({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID,
+        Username: email,
+        UserAttributes: [
+          { Name: "email", Value: email },
+          { Name: "name", Value: fullName },
+          { Name: "email_verified", Value: "true" },
+        ],
+        MessageAction: "SUPPRESS", // do not send invite email
+      })
+    );
 
-export const signup = async (fullName, email, password) => {
-  await cognito.send(
-    new AdminCreateUserCommand({
-      UserPoolId: process.env.COGNITO_USER_POOL_ID,
-      Username: email,
-      UserAttributes: [
-        { Name: "email", Value: email },
-        { Name: "name", Value: fullName },
-        { Name: "email_verified", Value: "true" },
-      ],
-      MessageAction: "SUPPRESS", // do not send invite email
-    })
-  );
+    await cognito.send(
+      new AdminSetUserPasswordCommand({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID,
+        Username: email,
+        Password: password,
+        Permanent: true,
+      })
+    );
 
-  await cognito.send(
-    new AdminSetUserPasswordCommand({
-      UserPoolId: process.env.COGNITO_USER_POOL_ID,
-      Username: email,
-      Password: password,
-      Permanent: true,
-    })
-  );
+    const user = await cognito.send(
+      new AdminGetUserCommand({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID,
+        Username: email,
+      })
+    );
 
-  const user = await cognito.send(
-    new AdminGetUserCommand({
-      UserPoolId: process.env.COGNITO_USER_POOL_ID,
-      Username: email,
-    })
-  );
+    const userInfo = {};
+    user.UserAttributes.forEach((attr) => {
+      userInfo[attr.Name] = attr.Value;
+    });
 
-  const userInfo = {};
-  user.UserAttributes.forEach((attr) => {
-    userInfo[attr.Name] = attr.Value;
-  });
+    const { IdToken, RefreshToken } = await cognitoLogin(email, password);
 
-  const newUser = {
-    _id: userInfo.sub,
-    email: userInfo.email,
-    fullName: userInfo.name,
-    createdAt: user.UserCreateDate,
-    updatedAt: user.UserLastModifiedDate,
-  };
+    const newUser = await createUser(
+      userInfo.name,
+      userInfo.email,
+      "cognito_login",
+      userInfo.sub
+    );
 
-  return newUser;
+    if (newUser) {
+      appendToken("idToken", IdToken, res);
+      appendToken("refreshToken", RefreshToken, res);
+
+      res.status(201).json({
+        _id: newUser._id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        profilePic: newUser.profilePic,
+        createdAt: newUser.createdAt,
+      });
+    } else {
+      return res.status(400).json({ message: "Invalid user data." });
+    }
+  } catch (error) {
+    console.log("Error in signup controller: ", error.message);
+    return res.status(500).json({ message: "Invalid Server Error." });
+  }
 };
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const secretHash = getSecretHash(
-      email,
-      process.env.COGNITO_CLIENT_ID,
-      process.env.COGNITO_CLIENT_SECRET
-    );
-
-    const response = await cognito.send(
-      new InitiateAuthCommand({
-        AuthFlow: "USER_PASSWORD_AUTH",
-        ClientId: process.env.COGNITO_CLIENT_ID,
-        AuthParameters: {
-          USERNAME: email,
-          PASSWORD: password,
-          ...(secretHash && { SECRET_HASH: secretHash }),
-        },
-      })
-    );
-
-    const { IdToken, AccessToken, RefreshToken, ExpiresIn } =
-      response.AuthenticationResult;
+    const { IdToken, RefreshToken } = await cognitoLogin(email, password);
     appendToken("idToken", IdToken, res);
     appendToken("refreshToken", RefreshToken, res);
 

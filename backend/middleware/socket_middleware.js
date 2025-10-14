@@ -5,10 +5,7 @@ import { verifyToken } from "../auth/auth.js";
 export const socket_protextRoute = async (socket, next) => {
   try {
     const cookies = cookie.parse(socket.handshake.headers.cookie || "");
-    const token = cookies.jwt;
-    if (!token) return;
-
-    const userId = await verifyToken(token);
+    const userId = await verifyToken(cookies);
     if (!userId) return;
 
     const user = await getUserById(userId);

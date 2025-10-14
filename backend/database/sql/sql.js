@@ -42,8 +42,8 @@ export const getUserByEmail = async (email) => {
   });
 };
 
-export const createUser = async (fullName, email, password) => {
-  return await User.create({ _id: uuidv4(), email, fullName, password });
+export const createUser = async (fullName, email, password, id) => {
+  return await User.create({ _id: id || uuidv4(), email, fullName, password });
 };
 
 export const findByIdAndUpdate = async (userId, url) => {
@@ -57,8 +57,6 @@ export const findByIdAndUpdate = async (userId, url) => {
 };
 
 export const getMessagesByIds = async (myId, userToChatId) => {
-  if (!isValidUuidV4(userToChatId)) return null;
-
   return await Message.findAll({
     where: {
       [Op.or]: [
