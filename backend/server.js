@@ -2,7 +2,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { connectDB } from "./database/db.js";
-
 import authRoutes from "./routes/auth.js";
 import messageRoutes from "./routes/message.js";
 import { app, server } from "./lib/socket.js";
