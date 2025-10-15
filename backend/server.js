@@ -14,8 +14,11 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/api/auth", authRoutes);
+app.use("/api/messages", messageRoutes);
+
 if (process.env.NODE_ENV == "production") {
-  app.use(express.static(path.join(__dirname, "/frontend/dist")));
+  app.use(express.static(path.join(__dirname, "frontend", "dist")));
   app.get(new RegExp(".*"), (req, res) => {
     res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
   });
@@ -27,9 +30,6 @@ if (process.env.NODE_ENV == "production") {
     })
   );
 }
-app.use("/api/auth", authRoutes);
-app.use("/api/messages", messageRoutes);
-
 server.listen(port, () => {
   console.log("Running on: " + port);
   connectDB();
