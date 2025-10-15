@@ -1,6 +1,4 @@
-import {
-  InitiateAuthCommand,
-} from "@aws-sdk/client-cognito-identity-provider";
+import { InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { appendToken } from "../../lib/utils.js";
 import { createUser, getUserByEmail } from "../../database/db.js";
 import {
@@ -64,7 +62,11 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.log("Error in login controller: ", error.message);
-    res.status(500).json({ message: "Internal Server Error." });
+    if (error.name === "NotAuthorizedException") {
+      res.status(500).json({ message: "Invalid credentials." });
+    } else {
+      res.status(500).json({ message: "Internal Server Error." });
+    }
   }
 };
 

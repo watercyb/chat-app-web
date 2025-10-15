@@ -42,4 +42,15 @@ const getReceiverSocketId = (userId) => {
   return userSocketMap[userId];
 };
 
-export { io, app, server, getReceiverSocketId };
+const disconnectByUserId = (userId) => {
+  const socketIds = userSocketMap[userId];
+  if (socketIds) {
+    socketIds.forEach((id) => {
+      io.sockets.sockets.get(id)?.disconnect(true);
+    });
+    delete userSocketMap[userId];
+  }
+  return userSocketMap[userId];
+};
+
+export { io, app, server, getReceiverSocketId, disconnectByUserId };

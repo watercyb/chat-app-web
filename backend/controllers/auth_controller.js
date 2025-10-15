@@ -1,5 +1,6 @@
 import cloudinary from "../lib/cloudinary.js";
 import { findByIdAndUpdate } from "../database/db.js";
+import { disconnectByUserId } from "../lib/socket.js";
 
 export const { signup, login } = await import("../auth/auth.js");
 
@@ -8,6 +9,7 @@ export const logout = (req, res) => {
     res.cookie("jwt", "", { maxAge: 0 });
     res.cookie("idToken", "", { maxAge: 0 });
     res.cookie("refreshToken", "", { maxAge: 0 });
+    disconnectByUserId(req.user._id);
     res.status(200).json({ message: "Logged out successfully." });
   } catch (error) {
     console.log("Error in logout controller: ", error.message);
