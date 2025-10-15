@@ -4,7 +4,7 @@ let db;
 
 dotenv.config();
 switch (process.env.DB_TYPE) {
-  case "sql":
+  case "mysql":
     db = await import("./sql/sql.js");
     break;
   case "mongodb":

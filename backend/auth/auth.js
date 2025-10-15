@@ -1,7 +1,7 @@
 let auth;
 
 switch (process.env.AUTH_TYPE) {
-  case "db":
+  case "jwt":
     auth = await import("./db/db.js");
     break;
   case "cognito":

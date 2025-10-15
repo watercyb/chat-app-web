@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import User from "./models/user_model.js";
 import Message from "./models/message_model.js";
+import { v4 as uuidv4 } from "uuid";
 
 export const connectDB = async () => {
   try {
@@ -24,12 +25,7 @@ export const getUserByEmail = async (email) => {
 };
 
 export const createUser = async (fullName, email, password, id) => {
-  let newUser;
-  if (id) {
-    newUser = new User({ _id: id, fullName, email, password });
-  } else {
-    newUser = new User({ fullName, email, password });
-  }
+  const newUser = new User({ _id: id || uuidv4(), fullName, email, password });
   await newUser.save();
   return newUser;
 };
@@ -43,8 +39,6 @@ export const findByIdAndUpdate = async (userId, url) => {
 };
 
 export const getMessagesByIds = async (myId, userToChatId) => {
-  if (!mongoose.Types.ObjectId.isValid(userToChatId)) return null;
-
   return await Message.find({
     $or: [
       { senderId: myId, receiverId: userToChatId },

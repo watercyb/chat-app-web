@@ -2,9 +2,7 @@ import sequelize from "./sequelize.js";
 import User from "./models/user_model.js";
 import Message from "./models/message_model.js";
 import { Op } from "sequelize";
-import { v4 as uuidv4, validate as isUuid, version as uuidVersion } from "uuid";
-
-const isValidUuidV4 = (id) => isUuid(id) && uuidVersion(id) === 4;
+import { v4 as uuidv4 } from "uuid";
 
 export const connectDB = async () => {
   try {

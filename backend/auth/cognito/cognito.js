@@ -1,56 +1,22 @@
 import {
-  CognitoIdentityProviderClient,
-  AdminCreateUserCommand,
-  AdminSetUserPasswordCommand,
-  AdminGetUserCommand,
   InitiateAuthCommand,
 } from "@aws-sdk/client-cognito-identity-provider";
 import { appendToken } from "../../lib/utils.js";
 import { createUser, getUserByEmail } from "../../database/db.js";
-import { verifyIdToken } from "./verifyIdToken.js";
-import { cognitoLogin } from "./cognitoLogin.js";
-
-const cognito = new CognitoIdentityProviderClient({
-  region: process.env.AWS_REGION,
-});
+import {
+  verifyIdToken,
+  cognitoLogin,
+  cognitoCheckEmail,
+  cognitoSignup,
+} from "./util.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
   try {
-    await cognito.send(
-      new AdminCreateUserCommand({
-        UserPoolId: process.env.COGNITO_USER_POOL_ID,
-        Username: email,
-        UserAttributes: [
-          { Name: "email", Value: email },
-          { Name: "name", Value: fullName },
-          { Name: "email_verified", Value: "true" },
-        ],
-        MessageAction: "SUPPRESS", // do not send invite email
-      })
-    );
+    if (await cognitoCheckEmail(email))
+      return res.status(400).json({ message: "Email already exists." });
 
-    await cognito.send(
-      new AdminSetUserPasswordCommand({
-        UserPoolId: process.env.COGNITO_USER_POOL_ID,
-        Username: email,
-        Password: password,
-        Permanent: true,
-      })
-    );
-
-    const user = await cognito.send(
-      new AdminGetUserCommand({
-        UserPoolId: process.env.COGNITO_USER_POOL_ID,
-        Username: email,
-      })
-    );
-
-    const userInfo = {};
-    user.UserAttributes.forEach((attr) => {
-      userInfo[attr.Name] = attr.Value;
-    });
-
+    const userInfo = await cognitoSignup(fullName, email, password);
     const { IdToken, RefreshToken } = await cognitoLogin(email, password);
 
     const newUser = await createUser(
