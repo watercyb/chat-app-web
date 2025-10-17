@@ -14,6 +14,15 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(cookieParser());
 
+if (process.env.NODE_ENV === "development") {
+    app.use(
+    cors({
+      origin: "http://localhost:5173",
+      credentials: true,
+    })
+  );
+}
+
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
@@ -22,14 +31,8 @@ if (process.env.NODE_ENV !== "development") {
   app.get(new RegExp(".*"), (req, res) => {
     res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
   });
-} else {
-  app.use(
-    cors({
-      origin: "http://localhost:5173",
-      credentials: true,
-    })
-  );
-}
+} 
+
 server.listen(port, () => {
   console.log("Running on: " + port);
   connectDB();

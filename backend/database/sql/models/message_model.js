@@ -5,10 +5,6 @@ import User from "./user_model.js";
 const Message = sequelize.define(
   "Message",
   {
-    _id: {
-      type: DataTypes.STRING,
-      primaryKey: true,
-    },
     senderId: {
       type: DataTypes.STRING,
       allowNull: false,

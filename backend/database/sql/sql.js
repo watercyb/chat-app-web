@@ -68,7 +68,6 @@ export const getMessagesByIds = async (myId, userToChatId) => {
 
 export const createMessage = async (senderId, receiverId, text, image) => {
   return await Message.create({
-    _id: uuidv4(),
     senderId,
     receiverId,
     text,

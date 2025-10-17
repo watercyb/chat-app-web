@@ -6,7 +6,6 @@ export const protextRoute = async (req, res, next) => {
     const userId = await verifyToken(req.cookies, res);
     if (!userId)
       return res.status(400).json({ message: "Please login first." });
-
     const user = await getUserById(userId);
     if (!user) return res.status(400).json({ message: "Please login first." });
 
