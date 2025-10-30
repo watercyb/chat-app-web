@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectDB } from "./database/db.js";
 import authRoutes from "./routes/auth.js";
 import messageRoutes from "./routes/message.js";
+import friendRoutes from "./routes/friend.js";
 import { app, server } from "./lib/socket.js";
 import path from "path";
 
@@ -25,6 +26,7 @@ if (process.env.NODE_ENV === "development") {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/friends", friendRoutes);
 
 if (process.env.NODE_ENV !== "development") {
   app.use(express.static(path.join(__dirname, "frontend", "dist")));

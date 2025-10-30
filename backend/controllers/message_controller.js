@@ -1,22 +1,6 @@
-import {
-  getAllUsers,
-  getMessagesByIds,
-  createMessage,
-} from "../database/db.js";
+import { getMessagesByIds, createMessage } from "../database/db.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
-
-export const getUsersForSideBar = async (req, res) => {
-  try {
-    const loggedInUserId = req.user._id;
-    const fileteredUsers = await getAllUsers(loggedInUserId);
-
-    res.status(200).json(fileteredUsers);
-  } catch (error) {
-    console.error("Error in getUsersForSideBar: ", error.message);
-    res.status(500).json({ error: "Internal server error." });
-  }
-};
 
 export const getMessages = async (req, res) => {
   try {
