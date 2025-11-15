@@ -18,6 +18,8 @@ const Sidebar = () => {
   const filteredUsers = showOnlineOnly
     ? users.filter((user) => onlineUsers.includes(user._id))
     : users;
+
+    
   
   const filteredAndSortedUsers = [...filteredUsers]
     .sort((a, b) => a.fullName.localeCompare(b.fullName))

@@ -32,6 +32,11 @@ const Navbar = () => {
                   <span className="hidden sm:inline">Profile</span>
                 </Link>
 
+                <Link to="/friends" className="btn btn-sm gap-2">
+                  <User className="size-5" />
+                  <span className="hidden sm:inline">Friends</span>
+                </Link>
+
                 <button
                   className="flex gap-2 items-center pl-3"
                   onClick={logout}

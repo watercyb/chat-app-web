@@ -147,10 +147,23 @@ export const friendRequestResponse = async (
 };
 
 export const randomUsers = async (userId) => {
-  const friends = await Friend.find({
-    status: "accepted",
-    $or: [{ requester: userId }, { recipient: userId }],
-  }).select("requester recipient -_id");
+  const [friends, sentRequests, receivedRequests] = await Promise.all([
+    Friend.find({
+      status: "accepted",
+      $or: [{ requester: userId }, { recipient: userId }],
+    }).select("requester recipient -_id"),
+
+    Friend.find({
+      requester: userId,
+      status: "pending",
+    }).populate("recipient", "-password"),
+
+    Friend.find({
+      recipient: userId,
+      status: "pending",
+    }).populate("requester", "-password"),
+  ]);
+
   const friendIds = friends.flatMap((f) =>
     f.requester === userId ? [f.recipient] : [f.requester]
   );
@@ -160,5 +173,8 @@ export const randomUsers = async (userId) => {
     .select("-password")
     .limit(6);
 
-  return randomUsers;
+  const pendingRequests = sentRequests.map((f) => f.recipient);
+  const pendingAccepting = receivedRequests.map((f) => f.requester);
+
+  return [randomUsers, pendingRequests, pendingAccepting];
 };

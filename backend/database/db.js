@@ -23,4 +23,7 @@ export const {
   findByIdAndUpdate,
   getMessagesByIds,
   createMessage,
+  randomUsers,
+  friendRequest,
+  friendRequestResponse,
 } = db;

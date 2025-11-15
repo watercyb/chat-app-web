@@ -6,6 +6,9 @@ import { useAuthStore } from "./useAuthStore";
 export const useChatStore = create((set, get) => ({
   messages: [],
   users: [],
+  friendReqSends: [],
+  friendReqReceives: [],
+  suggestedFriends: [],
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
@@ -14,7 +17,10 @@ export const useChatStore = create((set, get) => ({
     set({ isUsersLoading: true });
     try {
       const res = await axiosInstance.get("/friends/users");
-      set({ users: res.data });
+
+      set({ users: res.data[0] || [] });
+      set({ friendReqSends: res.data[1] || [] });
+      set({ friendReqReceives: res.data[2] || [] });
     } catch (error) {
       if (error.response) {
         toast.error(error.response.data.message || error.response.data.error);
@@ -87,6 +93,67 @@ export const useChatStore = create((set, get) => ({
     if (currectSelectedUser != selectedUser) {
       set({ selectedUser });
       set({ messages: [] });
+    }
+  },
+
+  getSuggestFriends: async () => {
+    set({ isUsersLoading: true });
+    try {
+      const res = await axiosInstance.get("/friends/suggestion");
+
+      set({ suggestedFriends: res.data[0] || [] });
+      set({ friendReqSends: res.data[1] || [] });
+      set({ friendReqReceives: res.data[2] || [] });
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data.message || error.response.data.error);
+      } else if (error.request) {
+        toast.error("No response from server. Please try again later.");
+      }
+      console.log("Error in getSuggestFriends: ", error);
+    } finally {
+      set({ isUsersLoading: false });
+    }
+  },
+
+  sendRequest: async (recipientId) => {
+    try {
+      const res = await axiosInstance.post("/friends/request", { recipientId });
+      console.log(res);
+      if (res.data.message) {
+        toast.success(res.data.message);
+      } else {
+        toast.error(res.data.error);
+      }
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data.message || error.response.data.error);
+      } else if (error.request) {
+        toast.error("No response from server. Please try again later.");
+      }
+      console.log("Error in sendRequest: ", error);
+    }
+  },
+
+  sendResponse: async (requesterId, accept) => {
+    try {
+      const res = await axiosInstance.post("/friends/response", {
+        requesterId,
+        accept,
+      });
+
+      if (res.data.message) {
+        toast.success(res.data.message);
+      } else {
+        toast.error(res.data.error);
+      }
+    } catch (error) {
+      if (error.response) {
+        toast.error(error.response.data.message || error.response.data.error);
+      } else if (error.request) {
+        toast.error("No response from server. Please try again later.");
+      }
+      console.log("Error in sendResponse: ", error);
     }
   },
 }));
