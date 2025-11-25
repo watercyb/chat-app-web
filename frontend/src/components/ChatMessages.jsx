@@ -85,7 +85,7 @@ const ChatMessages = () => {
         }
       }
     }
-  }, [messages]);
+  }, [authUser._id, isMessagesLoading, messages]);
 
   if (isMessagesLoading) return <MessageSkeleton />;
   if (!selectedUser) return <div></div>;

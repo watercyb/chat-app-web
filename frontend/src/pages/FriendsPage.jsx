@@ -15,6 +15,8 @@ const FriendsPage = () => {
     getSuggestFriends();
   }, [getSuggestFriends]);
 
+  console.log(friendReqReceives);
+
   return (
     <div className="h-screen bg-base-200">
       <div className="pt-20 p-4">

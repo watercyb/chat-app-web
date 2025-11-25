@@ -19,7 +19,7 @@ export const {
   getUserById,
   getUserByEmail,
   createUser,
-  getAllUsers,
+  getAllFriends,
   findByIdAndUpdate,
   getMessagesByIds,
   createMessage,

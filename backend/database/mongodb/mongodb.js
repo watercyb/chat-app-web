@@ -13,31 +13,17 @@ export const connectDB = async () => {
   }
 };
 
-export const getAllUsers = async (userId) => {
-  const [friends, sentRequests, receivedRequests] = await Promise.all([
-    Friend.find({
-      status: "accepted",
-      $or: [{ requester: userId }, { recipient: userId }],
-    }).populate("requester recipient", "-password"),
-
-    Friend.find({
-      requester: userId,
-      status: "pending",
-    }).populate("recipient", "-password"),
-
-    Friend.find({
-      recipient: userId,
-      status: "pending",
-    }).populate("requester", "-password"),
-  ]);
+export const getAllFriends = async (userId) => {
+  const friends = await Friend.find({
+    status: "accepted",
+    $or: [{ requester: userId }, { recipient: userId }],
+  }).populate("requester recipient", "-password");
 
   const friendUsers = friends.map((f) =>
     f.requester._id.toString() === userId.toString() ? f.recipient : f.requester
   );
-  const pendingRequests = sentRequests.map((f) => f.recipient);
-  const pendingAccepting = receivedRequests.map((f) => f.requester);
 
-  return [friendUsers, pendingRequests, pendingAccepting];
+  return friendUsers;
 };
 
 export const getUserById = async (userId) => {
@@ -173,8 +159,13 @@ export const randomUsers = async (userId) => {
     .select("-password")
     .limit(6);
 
-  const pendingRequests = sentRequests.map((f) => f.recipient);
-  const pendingAccepting = receivedRequests.map((f) => f.requester);
+  const pendingRequests = await User.find({
+    _id: { $in: sentRequests.map((f) => f.recipient) },
+  }).select("-password");
+
+  const pendingAccepting = await User.find({
+    _id: { $in: receivedRequests.map((f) => f.requester) },
+  }).select("-password");
 
   return [randomUsers, pendingRequests, pendingAccepting];
 };

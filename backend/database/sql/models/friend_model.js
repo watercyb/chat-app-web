@@ -10,7 +10,7 @@ const Friend = sequelize.define(
       allowNull: false,
       references: {
         model: User,
-        key: "id",
+        key: "_id",
       },
     },
     recipient: {
@@ -18,7 +18,7 @@ const Friend = sequelize.define(
       allowNull: false,
       references: {
         model: User,
-        key: "id",
+        key: "_id",
       },
     },
     status: {
