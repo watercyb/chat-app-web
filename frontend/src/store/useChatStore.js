@@ -19,8 +19,6 @@ export const useChatStore = create((set, get) => ({
       const res = await axiosInstance.get("/friends/users");
 
       set({ users: res.data[0] || [] });
-      set({ friendReqSends: res.data[1] || [] });
-      set({ friendReqReceives: res.data[2] || [] });
     } catch (error) {
       if (error.response) {
         toast.error(error.response.data.message || error.response.data.error);
@@ -119,8 +117,9 @@ export const useChatStore = create((set, get) => ({
   sendRequest: async (recipientId) => {
     try {
       const res = await axiosInstance.post("/friends/request", { recipientId });
-      console.log(res);
       if (res.data.message) {
+        get().getUsers();
+        get().getSuggestFriends();
         toast.success(res.data.message);
       } else {
         toast.error(res.data.error);
@@ -143,6 +142,8 @@ export const useChatStore = create((set, get) => ({
       });
 
       if (res.data.message) {
+        if (accept) get().getUsers();
+        get().getSuggestFriends();
         toast.success(res.data.message);
       } else {
         toast.error(res.data.error);

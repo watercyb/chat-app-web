@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { useChatStore } from "./useChatStore.js";
 
 const BASE_URL =
   import.meta.env.MODE == "production" ? "/" : "http://localhost:5000/";
@@ -119,6 +120,22 @@ export const useAuthStore = create((set, get) => ({
 
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
+    });
+
+    socket.on("newFriendRequest", () => {
+      useChatStore.getState().getUsers();
+      useChatStore.getState().getSuggestFriends();
+      toast.success("You have a new friend request.");
+    });
+
+    socket.on("newFriendResponse", (re) => {
+      useChatStore.getState().getSuggestFriends();
+      if (re.accept) {
+        useChatStore.getState().getUsers();
+        toast.success(`${re.user.fullName} accepted your friend request.`);
+      } else {
+        toast.error(`${re.user.fullName} declined your friend request.`);
+      }
     });
   },
 
